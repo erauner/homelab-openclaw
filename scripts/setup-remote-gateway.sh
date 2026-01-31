@@ -94,12 +94,30 @@ fi
 
 # Prompt for token if not provided
 if [[ -z "$TOKEN" ]]; then
-    echo ""
-    log_info "Gateway token required for authentication."
-    echo "Get the token from 1Password > Homelab vault > OpenClaw Gateway Token"
-    echo ""
-    read -sp "Enter gateway token: " TOKEN
-    echo ""
+    # Try to read from sops-encrypted secrets file
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    SECRETS_FILE="$SCRIPT_DIR/../secrets.sops.yaml"
+
+    if [[ -f "$SECRETS_FILE" ]] && command -v sops &> /dev/null; then
+        if [[ -n "${SOPS_AGE_KEY:-}" ]]; then
+            log_info "Reading token from encrypted secrets file..."
+            TOKEN=$(sops -d "$SECRETS_FILE" 2>/dev/null | grep 'token:' | awk '{print $2}')
+        else
+            log_warn "SOPS_AGE_KEY not set. Cannot decrypt secrets.sops.yaml"
+        fi
+    fi
+
+    # Prompt if still not set
+    if [[ -z "$TOKEN" ]]; then
+        echo ""
+        log_info "Gateway token required for authentication."
+        echo "Options:"
+        echo "  1. Set SOPS_AGE_KEY and run again (reads from secrets.sops.yaml)"
+        echo "  2. Get from 1Password > Homelab vault > OpenClaw Gateway Token"
+        echo ""
+        read -sp "Enter gateway token: " TOKEN
+        echo ""
+    fi
 fi
 
 if [[ -z "$TOKEN" ]]; then
@@ -112,10 +130,9 @@ log_info "Configuring remote gateway..."
 # Configure the gateway
 openclaw config set gateway.remote.url "$GATEWAY_URL"
 openclaw config set gateway.remote.token "$TOKEN"
-openclaw config set gateway.remote.enabled true
 
 log_info "Gateway URL: $GATEWAY_URL"
-log_info "Remote gateway enabled: true"
+log_info "Token configured: ****${TOKEN: -8}"
 
 # Test connection
 echo ""

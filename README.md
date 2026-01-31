@@ -40,7 +40,9 @@ openclaw --version
 ## Prerequisites
 
 - OpenClaw CLI installed (see above)
-- Access to the gateway token (stored in 1Password Homelab vault)
+- Access to the gateway token via one of:
+  - `SOPS_AGE_KEY` environment variable (auto-decrypts `secrets.sops.yaml`)
+  - 1Password Homelab vault → "OpenClaw Gateway Token"
 
 ## Quick Start
 
@@ -69,9 +71,6 @@ openclaw config set gateway.remote.url wss://openclaw.erauner.dev
 
 # Set the authentication token
 openclaw config set gateway.remote.token <token-from-1password>
-
-# Enable remote gateway mode
-openclaw config set gateway.remote.enabled true
 ```
 
 ### 3. Verify Connection
