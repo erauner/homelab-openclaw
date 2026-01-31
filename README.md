@@ -8,14 +8,45 @@ This repository contains configuration and scripts for connecting local OpenClaw
 
 **Gateway URL**: `wss://openclaw.erauner.dev`
 
+## Installation
+
+### Option 1: npm (recommended)
+
+```bash
+npm install -g openclaw@latest
+```
+
+### Option 2: pnpm
+
+```bash
+pnpm add -g openclaw@latest
+```
+
+### Option 3: From source
+
+```bash
+cd /Users/erauner/git/side/openclaw
+pnpm install
+pnpm build
+pnpm openclaw onboard --install-daemon
+```
+
+### Verify installation
+
+```bash
+openclaw --version
+```
+
 ## Prerequisites
 
-- OpenClaw CLI installed locally (`npm install -g @openclaw/cli` or via installer)
+- OpenClaw CLI installed (see above)
 - Access to the gateway token (stored in 1Password Homelab vault)
 
 ## Quick Start
 
-### 1. Configure Remote Gateway
+### 1. Install and Configure
+
+Run the setup script which handles installation and configuration:
 
 Run the setup script to configure your local CLI:
 
