@@ -81,14 +81,14 @@ openclaw gateway status
 
 ## Using with Obsidian
 
-Once connected to the remote gateway, OpenClaw can access your local Obsidian vault:
+Once connected to the remote gateway, start OpenClaw from your vault directory:
 
 ```bash
-# Start OpenClaw with your vault path
-openclaw --vault ~/Documents/Obsidian/MyVault
+# Navigate to your vault
+cd /Users/erauner/obsidian_vaults/mdbase_vault
 
-# Or configure the default vault
-openclaw config set vault.path ~/Documents/Obsidian/MyVault
+# Start OpenClaw (works with current directory)
+openclaw
 ```
 
 The remote gateway provides:
@@ -96,7 +96,7 @@ The remote gateway provides:
 - GitHub integration
 - Anthropic API access
 
-Your local vault files stay local - OpenClaw CLI reads them directly.
+Your local vault files stay local - OpenClaw CLI reads them directly from the current working directory.
 
 ## Security Model
 
