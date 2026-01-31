@@ -1,0 +1,26 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: homelab-openclaw
+  title: OpenClaw CLI Configuration
+  description: OpenClaw CLI configuration and scripts for remote gateway access
+  annotations:
+    github.com/project-slug: erauner/homelab-openclaw
+    backstage.io/techdocs-ref: dir:.
+  tags:
+    - cli
+    - ai
+    - configuration
+  links:
+    - url: https://openclaw.erauner.dev
+      title: OpenClaw Gateway
+      icon: dashboard
+    - url: https://openclaw.dev/docs
+      title: OpenClaw Documentation
+      icon: docs
+spec:
+  type: library
+  lifecycle: production
+  owner: homelab
+  dependsOn:
+    - component:default/openclaw
