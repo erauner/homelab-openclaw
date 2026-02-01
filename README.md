@@ -57,7 +57,7 @@ Your Devices                         Kubernetes Cluster
                                                      │
                                     ┌────────────────────────────────────────┐
                                     │         Your CLI (remote mode)         │
-                                    │   openclaw agent --agent obsidian      │
+                                    │   openclaw agent --agent main          │
                                     │   --message "List my tasks"            │
                                     └────────────────────────────────────────┘
 ```
@@ -67,13 +67,14 @@ Your Devices                         Kubernetes Cluster
 | Sync Method | Purpose | Latency | Direction |
 |-------------|---------|---------|-----------|
 | **Obsidian Sync** | Real-time sync between your devices (Mac, phone, tablet) | Instant | Bidirectional |
-| **Git** | Version control + get vault into K8s | ~60 seconds | Push to GitHub → K8s pulls |
+| **Git** | Version control + sync with K8s gateway | ~60 seconds | Bidirectional |
 
 **Recommended workflow:**
 1. Edit in Obsidian on any device (synced instantly via Obsidian Sync)
 2. Periodically commit and push to GitHub (manual or via Obsidian Git plugin)
 3. K8s gateway pulls changes within 60 seconds
-4. Changes made by the gateway are committed by git-sync (requires GitHub push from pod)
+4. Changes made by the gateway are committed and pushed back to GitHub
+5. Pull locally to get gateway-created notes: `git pull origin main`
 
 **Note:** Obsidian Sync and Git are complementary:
 - Obsidian Sync handles real-time device sync
@@ -139,23 +140,56 @@ openclaw config set gateway.remote.token <token-from-1password>
 openclaw gateway probe
 ```
 
+## Convenience Scripts
+
+### Shell Aliases (Recommended)
+
+Add to your `~/.zshrc` or `~/.bashrc`:
+
+```bash
+source ~/git/side/homelab-openclaw/scripts/aliases.sh
+```
+
+This provides:
+- `oc-agent '<message>'` - Send message to OpenClaw agent
+- `oc-vault-push` - Commit and push vault changes
+- `oc-vault-status` - Show vault git status
+- `oc-vault-ls` - List vault files
+- `oc-vault-search <query>` - Search vault content
+- `oc-quick-note <content>` - Create a quick timestamped note
+
+### Direct Scripts
+
+```bash
+# Send any message to the agent
+./scripts/oc-agent.sh "List my tasks"
+
+# Create a note (with optional --push to commit/push immediately)
+./scripts/oc-note.sh "Meeting Notes" "Discussed Q1 goals"
+./scripts/oc-note.sh --push "Quick Idea" "Remember to follow up on X"
+```
+
 ## Using the Obsidian Skill
 
-The obsidian skill is available on the remote gateway:
+The obsidian skill is available on the remote gateway's `main` agent:
 
 ```bash
 # List vault files
-openclaw agent --message "List all markdown files in the vault"
+openclaw agent --agent main --message "List all markdown files in the vault"
 
 # Search for tasks
-openclaw agent --message "Find all tasks tagged #urgent"
+openclaw agent --agent main --message "Find all tasks tagged #urgent"
 
 # Create a new note
-openclaw agent --message "Create a note called 'Meeting Notes' with today's date"
+openclaw agent --agent main --message "Create a note called 'Meeting Notes' with today's date"
+
+# Create and push (bidirectional sync)
+openclaw agent --agent main --message "Create a note called 'New-Note.md' with content: Hello world"
+openclaw agent --agent main --message "Commit all changes and push to origin HEAD:main"
 ```
 
 **Note:** The gateway uses the vault synced from GitHub, not your local vault.
-Changes made by the gateway are committed to git but require push access to sync back.
+The gateway can push changes back to GitHub, enabling bidirectional sync.
 
 ## K8s Deployment Details
 
