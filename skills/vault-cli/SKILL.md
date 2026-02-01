@@ -1,25 +1,25 @@
 ---
 name: vault-cli
-description: Manage Obsidian vault tasks and notes using the vault-cli tool. Create tasks, query open items, generate reports, and validate schemas.
-metadata: {"openclaw":{"emoji":"📋","requires":{"bins":["node"]}}}
+description: Manage Obsidian vault tasks and notes using obsidian-tools. Create tasks, query open items, generate reports, and validate schemas.
+metadata: {"openclaw":{"emoji":"📋","requires":{"bins":["obsidian-tools"]}}}
 ---
 
 # vault-cli
 
-A CLI for managing an Obsidian vault with structured tasks and notes. Located at `/home/node/vaults/mdbase/current/scripts/vault-cli`.
+A CLI for managing an Obsidian vault with structured tasks and notes using `obsidian-tools`.
 
 ## Vault Location
 
 The vault is at: `/home/node/vaults/mdbase/current`
 
-The CLI script is at: `/home/node/vaults/mdbase/current/scripts/vault-cli`
-
 ## Available Commands
+
+All commands use: `obsidian-tools --vault /home/node/vaults/mdbase/current <command>`
 
 ### Add a Task
 
 ```bash
-./scripts/vault-cli add task --title "Task title" --priority 1 --status open --tags work,urgent
+obsidian-tools --vault /home/node/vaults/mdbase/current add task --title "Task title" --priority 1 --status open --tags work,urgent
 ```
 
 Options:
@@ -31,7 +31,7 @@ Options:
 ### Add a Note
 
 ```bash
-./scripts/vault-cli add note --title "Note title" --body "# Content here"
+obsidian-tools --vault /home/node/vaults/mdbase/current add note --title "Note title" --body "# Content here"
 ```
 
 Options:
@@ -41,7 +41,7 @@ Options:
 ### Query Open Tasks
 
 ```bash
-./scripts/vault-cli query
+obsidian-tools --vault /home/node/vaults/mdbase/current query
 ```
 
 Lists all open tasks sorted by priority. Output format:
@@ -55,7 +55,7 @@ Lists all open tasks sorted by priority. Output format:
 ### Vault Report
 
 ```bash
-./scripts/vault-cli report
+obsidian-tools --vault /home/node/vaults/mdbase/current report
 ```
 
 Shows statistics: total files, tasks by status, notes count, etc.
@@ -63,7 +63,7 @@ Shows statistics: total files, tasks by status, notes count, etc.
 ### Validate Schemas
 
 ```bash
-./scripts/vault-cli validate
+obsidian-tools --vault /home/node/vaults/mdbase/current validate
 ```
 
 Checks all tasks/notes against their type schemas in `_types/`.
@@ -71,7 +71,7 @@ Checks all tasks/notes against their type schemas in `_types/`.
 ### List Files
 
 ```bash
-./scripts/vault-cli list
+obsidian-tools --vault /home/node/vaults/mdbase/current list
 ```
 
 Lists all markdown files in the vault.
@@ -89,9 +89,7 @@ Lists all markdown files in the vault.
 ├── inbox/            # Quick captures
 ├── projects/         # Project notes
 ├── logs/             # Daily logs
-├── reference/        # Reference material
-└── scripts/          # vault-cli lives here
-    └── vault-cli
+└── reference/        # Reference material
 ```
 
 ## Task Frontmatter Schema
@@ -119,14 +117,6 @@ created: '2026-01-31'
 ---
 ```
 
-## Working Directory
-
-Always run vault-cli from the vault root:
-
-```bash
-cd /home/node/vaults/mdbase/current && ./scripts/vault-cli <command>
-```
-
 ## Git Sync
 
 Changes are synced via git-sync sidecar. To push changes:
@@ -142,18 +132,15 @@ git push origin HEAD:main
 
 Create a high-priority task:
 ```bash
-cd /home/node/vaults/mdbase/current
-./scripts/vault-cli add task --title "Fix auth bug" --priority 1 --status open --tags urgent,backend
+obsidian-tools --vault /home/node/vaults/mdbase/current add task --title "Fix auth bug" --priority 1 --status open --tags urgent,backend
 ```
 
 Check what's open:
 ```bash
-cd /home/node/vaults/mdbase/current
-./scripts/vault-cli query
+obsidian-tools --vault /home/node/vaults/mdbase/current query
 ```
 
 Add a meeting note:
 ```bash
-cd /home/node/vaults/mdbase/current
-./scripts/vault-cli add note --title "Team Standup 2026-01-31" --body "# Attendees\n- Alice\n- Bob\n\n# Notes\n..."
+obsidian-tools --vault /home/node/vaults/mdbase/current add note --title "Team Standup 2026-01-31" --body "# Attendees\n- Alice\n- Bob\n\n# Notes\n..."
 ```
