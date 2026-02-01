@@ -152,22 +152,18 @@ source ~/git/side/homelab-openclaw/scripts/aliases.sh
 
 This provides:
 - `oc-agent '<message>'` - Send message to OpenClaw agent
-- `oc-vault-push` - Commit and push vault changes
-- `oc-vault-status` - Show vault git status
-- `oc-vault-ls` - List vault files
-- `oc-vault-search <query>` - Search vault content
-- `oc-quick-note <content>` - Create a quick timestamped note
 
 ### Direct Scripts
 
 ```bash
 # Send any message to the agent
-./scripts/oc-agent.sh "List my tasks"
+./scripts/oc-agent.sh "Show my open tasks"
 
-# Create a note (with optional --push to commit/push immediately)
-./scripts/oc-note.sh "Meeting Notes" "Discussed Q1 goals"
-./scripts/oc-note.sh --push "Quick Idea" "Remember to follow up on X"
+# Or use the alias
+oc-agent "Create a P1 task: Fix auth bug, tags: work"
 ```
+
+Vault operations are handled by the `vault-cli` skill on the gateway - just ask the agent naturally.
 
 ## Using the vault-cli Skill
 
