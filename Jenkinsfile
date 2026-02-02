@@ -1,12 +1,49 @@
-@Library('homelab-jenkins-library@main') _
-
 def IMAGE_NAME = 'openclaw'
 def REGISTRY = 'nexus.erauner.dev'
+
+// Inline kaniko pod template (no shared library dependency)
+def kanikoPodTemplate = '''
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    workload-type: ci-builds
+spec:
+  imagePullSecrets:
+  - name: nexus-registry-credentials
+  containers:
+  - name: jnlp
+    image: jenkins/inbound-agent:3355.v388858a_47b_33-3-jdk21
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ['sleep', '3600']
+    volumeMounts:
+    - name: nexus-creds
+      mountPath: /kaniko/.docker
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+  volumes:
+  - name: nexus-creds
+    secret:
+      secretName: nexus-registry-credentials
+'''
 
 pipeline {
     agent {
         kubernetes {
-            yaml homelab.podTemplate('kaniko')
+            yaml kanikoPodTemplate
         }
     }
 
@@ -65,16 +102,10 @@ pipeline {
 
     post {
         success {
-            script {
-                if (env.BRANCH_NAME == 'main') {
-                    homelab.notifyDiscord(status: 'SUCCESS', message: "OpenClaw image pushed to ${REGISTRY}")
-                }
-            }
+            echo "Build succeeded - image pushed to ${REGISTRY}/homelab/${IMAGE_NAME}"
         }
         failure {
-            script {
-                homelab.notifyDiscord(status: 'FAILURE')
-            }
+            echo "Build failed"
         }
     }
 }
