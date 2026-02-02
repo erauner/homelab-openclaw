@@ -1,5 +1,5 @@
 def IMAGE_NAME = 'openclaw'
-def REGISTRY = 'nexus.erauner.dev'
+def REGISTRY = 'docker.nexus.erauner.dev'
 
 // Inline kaniko pod template (no shared library dependency)
 def kanikoPodTemplate = '''
