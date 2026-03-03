@@ -8,6 +8,43 @@ This repository contains configuration and scripts for connecting local OpenClaw
 
 **Gateway URL**: `wss://openclaw.erauner.dev`
 
+## Runtime Image Workflow
+
+This repo also builds a custom runtime image to remove startup-time downloads from the
+OpenClaw pod init containers.
+
+- Image repository: `docker.nexus.erauner.dev/homelab/openclaw-runtime`
+- Stable tag format: `<openclaw-base-tag>-runtime`
+- Immutable tag format: `<openclaw-base-tag>-runtime-<git-sha>`
+
+### Local Build + Test
+
+Build locally:
+
+```bash
+./scripts/build-runtime-local.sh
+```
+
+Smoke test locally:
+
+```bash
+./scripts/smoke-test-runtime.sh homelab-openclaw-runtime:local
+```
+
+Optional: test against a different base OpenClaw image:
+
+```bash
+OPENCLAW_VERSION=2026.3.2-amd64 ./scripts/build-runtime-local.sh
+```
+
+### Jenkins Output
+
+On `main`, Jenkins publishes:
+
+- `docker.nexus.erauner.dev/homelab/openclaw-runtime:latest`
+- `docker.nexus.erauner.dev/homelab/openclaw-runtime:<openclaw-base-tag>-runtime`
+- `docker.nexus.erauner.dev/homelab/openclaw-runtime:<openclaw-base-tag>-runtime-<git-sha>`
+
 ## Architecture
 
 There are two ways to use OpenClaw with your Obsidian vault:

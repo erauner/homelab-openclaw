@@ -1,7 +1,6 @@
-def IMAGE_NAME = 'openclaw'
+def IMAGE_NAME = 'openclaw-runtime'
 def REGISTRY = 'docker.nexus.erauner.dev'
 
-// Inline kaniko pod template (no shared library dependency)
 def kanikoPodTemplate = '''
 apiVersion: v1
 kind: Pod
@@ -48,21 +47,40 @@ pipeline {
     }
 
     options {
-        buildDiscarder(logRotator(numToKeepStr: '10'))
-        timeout(time: 30, unit: 'MINUTES')
+        buildDiscarder(logRotator(numToKeepStr: '20'))
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
     }
 
     environment {
-        // OpenClaw base version to use
-        OPENCLAW_VERSION = '2026.1.29-amd64'
-        // Tool versions
-        MDBASE_VERSION = '0.7.0'
-        TODOIST_VERSION = '0.23.0'
-        GOG_VERSION = '0.9.0'
+        OPENCLAW_VERSION = '2026.3.2-amd64'
         GH_VERSION = '2.61.0'
+        GOG_VERSION = '0.9.0'
+        MDBASE_CLI_VERSION = '0.7.0'
+        TODOIST_CLI_VERSION = '0.8.23'
+        JQ_VERSION = '1.7.1'
+        RIPGREP_VERSION = '14.1.1'
+        KUBECTL_VERSION = 'v1.31.3'
+        MCPORTER_VERSION = 'latest'
+        SUMMARIZE_VERSION = 'latest'
     }
 
     stages {
+        stage('Prepare Tags') {
+            steps {
+                script {
+                    env.COMMIT_SHORT = sh(returnStdout: true, script: 'git rev-parse --short=12 HEAD').trim()
+                    env.RUNTIME_TAG = "${env.OPENCLAW_VERSION}-runtime"
+                    env.IMMUTABLE_TAG = "${env.RUNTIME_TAG}-${env.COMMIT_SHORT}"
+                    env.PR_TAG = "pr-${env.CHANGE_ID ?: 'local'}-${env.COMMIT_SHORT}"
+
+                    echo "Base OpenClaw: ${env.OPENCLAW_VERSION}"
+                    echo "Stable runtime tag: ${env.RUNTIME_TAG}"
+                    echo "Immutable runtime tag: ${env.IMMUTABLE_TAG}"
+                }
+            }
+        }
+
         stage('Build & Push') {
             when {
                 anyOf {
@@ -73,27 +91,37 @@ pipeline {
             steps {
                 container('kaniko') {
                     script {
-                        def imageTag = env.BRANCH_NAME == 'main' ? 'latest' : "pr-${env.CHANGE_ID}"
-                        def fullImage = "${REGISTRY}/homelab/${IMAGE_NAME}:${imageTag}"
-                        def versionedImage = "${REGISTRY}/homelab/${IMAGE_NAME}:${OPENCLAW_VERSION}"
+                        def destinations = []
+                        if (env.BRANCH_NAME == 'main') {
+                            destinations << "${REGISTRY}/homelab/${IMAGE_NAME}:latest"
+                            destinations << "${REGISTRY}/homelab/${IMAGE_NAME}:${env.RUNTIME_TAG}"
+                            destinations << "${REGISTRY}/homelab/${IMAGE_NAME}:${env.IMMUTABLE_TAG}"
+                        } else {
+                            destinations << "${REGISTRY}/homelab/${IMAGE_NAME}:${env.PR_TAG}"
+                        }
+
+                        def destinationArgs = destinations.collect { "--destination=${it}" }.join(' ')
 
                         sh """
                             /kaniko/executor \
                                 --context=dir://. \
                                 --dockerfile=Dockerfile \
-                                --destination=${fullImage} \
-                                --destination=${versionedImage} \
+                                ${destinationArgs} \
                                 --build-arg=OPENCLAW_VERSION=${OPENCLAW_VERSION} \
-                                --build-arg=MDBASE_VERSION=${MDBASE_VERSION} \
-                                --build-arg=TODOIST_VERSION=${TODOIST_VERSION} \
-                                --build-arg=GOG_VERSION=${GOG_VERSION} \
                                 --build-arg=GH_VERSION=${GH_VERSION} \
+                                --build-arg=GOG_VERSION=${GOG_VERSION} \
+                                --build-arg=MDBASE_CLI_VERSION=${MDBASE_CLI_VERSION} \
+                                --build-arg=TODOIST_CLI_VERSION=${TODOIST_CLI_VERSION} \
+                                --build-arg=JQ_VERSION=${JQ_VERSION} \
+                                --build-arg=RIPGREP_VERSION=${RIPGREP_VERSION} \
+                                --build-arg=KUBECTL_VERSION=${KUBECTL_VERSION} \
+                                --build-arg=MCPORTER_VERSION=${MCPORTER_VERSION} \
+                                --build-arg=SUMMARIZE_VERSION=${SUMMARIZE_VERSION} \
                                 --cache=true \
                                 --cache-repo=${REGISTRY}/homelab/cache
                         """
 
-                        echo "Pushed: ${fullImage}"
-                        echo "Pushed: ${versionedImage}"
+                        destinations.each { echo "Pushed: ${it}" }
                     }
                 }
             }
@@ -102,7 +130,10 @@ pipeline {
 
     post {
         success {
-            echo "Build succeeded - image pushed to ${REGISTRY}/homelab/${IMAGE_NAME}"
+            echo "Build succeeded for ${REGISTRY}/homelab/${IMAGE_NAME}"
+            if (env.BRANCH_NAME == 'main') {
+                echo "Use in k8s: ${REGISTRY}/homelab/${IMAGE_NAME}:${env.RUNTIME_TAG}"
+            }
         }
         failure {
             echo "Build failed"
