@@ -130,9 +130,11 @@ pipeline {
 
     post {
         success {
-            echo "Build succeeded for ${REGISTRY}/homelab/${IMAGE_NAME}"
-            if (env.BRANCH_NAME == 'main') {
-                echo "Use in k8s: ${REGISTRY}/homelab/${IMAGE_NAME}:${env.RUNTIME_TAG}"
+            script {
+                echo "Build succeeded for ${REGISTRY}/homelab/${IMAGE_NAME}"
+                if (env.BRANCH_NAME == 'main') {
+                    echo "Use in k8s: ${REGISTRY}/homelab/${IMAGE_NAME}:${env.RUNTIME_TAG}"
+                }
             }
         }
         failure {
