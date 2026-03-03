@@ -45,6 +45,30 @@ On `main`, Jenkins publishes:
 - `docker.nexus.erauner.dev/homelab/openclaw-runtime:<openclaw-base-tag>-runtime`
 - `docker.nexus.erauner.dev/homelab/openclaw-runtime:<openclaw-base-tag>-runtime-<git-sha>`
 
+### Recommended Change Workflow
+
+Use this when changing tools or base OpenClaw version:
+
+1. Edit [Dockerfile](/Users/erauner/git/side/homelab-openclaw/Dockerfile) and, if needed, version defaults in [Jenkinsfile](/Users/erauner/git/side/homelab-openclaw/Jenkinsfile).
+2. Build locally:
+   ```bash
+   ./scripts/build-runtime-local.sh
+   ```
+3. Smoke test locally:
+   ```bash
+   ./scripts/smoke-test-runtime.sh homelab-openclaw-runtime:local
+   ```
+4. Commit and push `main` in `homelab-openclaw` (Jenkins will publish runtime tags).
+5. In `homelab-k8s`, update:
+   - `version-sync/yaml-manager/catalog/openclaw.yaml` -> `OPENCLAW_TAG`
+6. Run sync in `homelab-k8s`:
+   ```bash
+   version-sync/yaml-manager/run-openclaw-sync.sh
+   ```
+7. Commit/push `homelab-k8s` and let ArgoCD sync.
+
+Tip: use the stable runtime tag format `<openclaw-base-tag>-runtime` in GitOps, not `latest`.
+
 ## Architecture
 
 There are two ways to use OpenClaw with your Obsidian vault:
