@@ -53,7 +53,7 @@ pipeline {
     }
 
     environment {
-        OPENCLAW_VERSION = '2026.3.2-amd64'
+        OPENCLAW_VERSION = '2026.3.7-amd64'
         GH_VERSION = '2.61.0'
         GOG_VERSION = '0.9.0'
         MDBASE_CLI_VERSION = '0.7.0'

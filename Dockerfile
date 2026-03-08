@@ -1,6 +1,6 @@
 # OpenClaw runtime image with pre-installed tools.
 # Goal: eliminate per-pod init-container downloads.
-ARG OPENCLAW_VERSION=2026.3.2-amd64
+ARG OPENCLAW_VERSION=2026.3.7-amd64
 FROM ghcr.io/openclaw/openclaw:${OPENCLAW_VERSION}
 
 ARG GH_VERSION=2.61.0

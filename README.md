@@ -34,7 +34,7 @@ Smoke test locally:
 Optional: test against a different base OpenClaw image:
 
 ```bash
-OPENCLAW_VERSION=2026.3.2-amd64 ./scripts/build-runtime-local.sh
+OPENCLAW_VERSION=2026.3.7-amd64 ./scripts/build-runtime-local.sh
 ```
 
 ### Jenkins Output
